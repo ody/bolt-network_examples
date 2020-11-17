@@ -1,0 +1,92 @@
+---
+version: 2
+config:
+  transport: ssh
+  ssh:
+    host-key-check: false
+    tty: true
+targets:
+  - uri: localhost
+    config:
+      transport: local
+  - uri: 127.0.0.1
+    config:
+      transport: local
+  - uri: 10.138.0.5
+    name: f5-big-ip-0-vm-local
+    config:
+      ssh:
+        user: admin
+        password: puppetlabs
+  - uri: 34.83.16.180
+    name: f5-big-ip-0-vm
+    config:
+      ssh:
+        user: admin
+        password: puppetlabs
+  - uri: 34.82.15.147
+    name: proxy
+    config:
+      ssh:
+        run-as: root
+        interpreters:
+          rb: "/opt/puppetlabs/puppet/bin/ruby"
+groups:
+  - name: peadm_nodes
+    config:
+      ssh:
+        run-as: root
+    targets:
+      - _plugin: terraform
+        dir: ext/terraform/google_pe_arch
+        resource_type: google_compute_instance.master
+        target_mapping:
+          name: metadata.internalDNS
+          uri: network_interface.0.access_config.0.nat_ip
+      - _plugin: terraform
+        dir: ext/terraform/google_pe_arch
+        resource_type: google_compute_instance.compiler
+        target_mapping:
+          name: metadata.internalDNS
+          uri: network_interface.0.access_config.0.nat_ip
+      - _plugin: terraform
+        dir: ext/terraform/google_pe_arch
+        resource_type: google_compute_instance.psql
+        target_mapping:
+          name: metadata.internalDNS
+          uri: network_interface.0.access_config.0.nat_ip
+      - _plugin: terraform
+        dir: ext/terraform/aws_pe_arch
+        resource_type: aws_instance.master
+        target_mapping:
+          name: public_dns
+          uri: public_ip
+      - _plugin: terraform
+        dir: ext/terraform/aws_pe_arch
+        resource_type: aws_instance.compiler
+        target_mapping:
+          name: public_dns
+          uri: public_ip
+      - _plugin: terraform
+        dir: ext/terraform/aws_pe_arch
+        resource_type: aws_instance.psql
+        target_mapping:
+          name: public_dns
+          uri: public_ip
+  - name: agent_nodes
+    config:
+      ssh:
+        run-as: root
+    targets:
+      - _plugin: terraform
+        dir: ext/terraform/google_pe_arch
+        resource_type: google_compute_instance.node
+        target_mapping:
+          name: metadata.internalDNS
+          uri: network_interface.0.access_config.0.nat_ip
+      - _plugin: terraform
+        dir: ext/terraform/aws_pe_arch
+        resource_type: aws_instance.node
+        target_mapping:
+          name: public_dns
+          uri: public_ip
