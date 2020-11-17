@@ -1,4 +1,4 @@
-plan networking_examples::f5::ssl::upload_and_configure(
+plan network_examples::f5::ssl::upload_and_configure(
   TargetSpec $targets,
   TargetSpec $proxy,
   String[1]  $cert_name
